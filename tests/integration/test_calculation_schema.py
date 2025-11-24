@@ -2,7 +2,7 @@ from app.schemas.calculation import CalculationCreate, CalculationType
 import pytest
 
 def test_valid_addition():
-    data = {"type": CalculationType.addition, "inputs": [1,2], "user_id": 1}
+    data = {"type": CalculationType.addition, "inputs": [1,2], "user_id": "00000000-0000-0000-0000-000000000001"}
     obj = CalculationCreate(**data)
     assert obj.type == CalculationType.addition
 

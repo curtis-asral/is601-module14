@@ -19,7 +19,7 @@ class CalculationBase(BaseModel):
         return v
 
 class CalculationCreate(CalculationBase):
-    user_id: int
+    user_id: str
 
     @validator("inputs")
     def no_div_zero(cls, v, values):
@@ -31,9 +31,9 @@ class CalculationCreate(CalculationBase):
 class CalculationUpdate(BaseModel):
     type: Optional[CalculationType]
     inputs: Optional[List[float]]
-    user_id: Optional[int]
+    user_id: Optional[str]
 
 class CalculationResponse(CalculationBase):
     id: int
-    user_id: int
+    user_id: str
     result: float

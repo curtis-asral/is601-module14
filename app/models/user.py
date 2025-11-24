@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 
 from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
+from app.database import Base
 from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -14,7 +14,6 @@ from pydantic import ValidationError
 from app.schemas.base import UserCreate
 from app.schemas.user import UserResponse, Token
 
-Base = declarative_base()
 
 # Use a pure-Python backend to avoid dependency issues with the bcrypt C extension
 # pbkdf2_sha256 is widely supported and suitable for tests and demos

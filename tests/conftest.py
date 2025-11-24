@@ -220,7 +220,7 @@ def fastapi_server():
 
     try:
         process = subprocess.Popen(
-            ['python', 'main.py'],
+            ['./venv/bin/python', 'main.py'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )

@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
 
 class Calculation(Base):
     __tablename__ = "calculations"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     type = Column(String)
     inputs = Column(JSON)
     __mapper_args__ = {"polymorphic_on": type, "polymorphic_identity": "calculation"}
