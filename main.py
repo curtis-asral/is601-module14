@@ -1,3 +1,6 @@
+from app.auth.dependencies import get_current_active_user
+# Store homepage calculation in DB for logged-in user
+from app.schemas.calculation import CalculationType
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
@@ -102,7 +105,8 @@ async def register_user(request: Request, db: Session = Depends(get_db)):
             "login.html", {"request": request, "error": "User already exists."}
         )
     hashed = User.hash_password(user_data["password"])
-    new_user = User(**user_data, password=hashed)
+    user_data["password"] = hashed
+    new_user = User(**user_data)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -120,10 +124,9 @@ async def login_user(request: Request, db: Session = Depends(get_db)):
             "login.html", {"request": request, "error": "Invalid credentials."}
         )
     token = User.create_access_token({"sub": str(db_user.id)})
-    return templates.TemplateResponse(
-        "login.html",
-        {"request": request, "success": "Logged in!", "token": token, "user": db_user},
-    )
+    response = RedirectResponse("/calculations", status_code=303)
+    response.set_cookie("access_token", token, httponly=True)
+    return response
 
 
 # Calculation Endpoints (BREAD)
@@ -157,6 +160,42 @@ def read_calculation(
         inputs=i.inputs,
         result=i.get_result(),
     )
+    
+@app.post("/")
+async def store_homepage_calculation(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    form = await request.form()
+    a = float(form.get("a"))
+    b = float(form.get("b"))
+    op = form.get("operation")
+    # Map operation to CalculationType
+    op_map = {
+        "add": CalculationType.addition,
+        "subtract": CalculationType.subtraction,
+        "multiply": CalculationType.multiplication,
+        "divide": CalculationType.division,
+        "modulus": CalculationType.modulus,
+    }
+    calc_type = op_map.get(op)
+    if not calc_type:
+        return JSONResponse(status_code=400, content={"error": "Invalid operation"})
+    from app.models.calculation import Calculation
+    obj = Calculation.create(calc_type.value, current_user.id, [a, b])
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return RedirectResponse("/calculations", status_code=303)
+@app.post("/modulus")
+async def modulus_endpoint(data: OperationRequest):
+    try:
+        from app.operations import modulus
+        result = modulus(data.a, data.b)
+        return {"result": result}
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"error": str(e)})
 
 
 @app.post("/calculations")

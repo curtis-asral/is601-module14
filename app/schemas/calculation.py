@@ -8,6 +8,7 @@ class CalculationType(str, Enum):
     subtraction = "subtraction"
     multiplication = "multiplication"
     division = "division"
+    modulus = "modulus"
 
 
 class CalculationBase(BaseModel):
@@ -26,7 +27,8 @@ class CalculationCreate(CalculationBase):
 
     @validator("inputs")
     def no_div_zero(cls, v, values):
-        if values.get("type") == CalculationType.division:
+        t = values.get("type")
+        if t == CalculationType.division or t == CalculationType.modulus:
             if any(x == 0 for x in v[1:]):
                 raise ValueError()
         return v

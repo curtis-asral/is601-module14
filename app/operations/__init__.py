@@ -122,3 +122,31 @@ def divide(a: Number, b: Number) -> float:
     # Perform division of a by b and return the result as a float
     result = a / b
     return result
+
+def modulus(a: Number, b: Number) -> Number:
+    """
+    Compute the modulus (remainder) of the first number divided by the second.
+
+    Parameters:
+    - a (int or float): The dividend.
+    - b (int or float): The divisor.
+
+    Returns:
+    - int or float: The remainder of a divided by b.
+
+    Raises:
+    - ValueError: If b is zero, as modulus by zero is undefined.
+
+    Example:
+    >>> modulus(7, 3)
+    1
+    >>> modulus(10, 2)
+    0
+    >>> modulus(5, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: Cannot perform modulus by zero!
+    """
+    if b == 0:
+        raise ValueError("Cannot perform modulus by zero!")
+    return a % b

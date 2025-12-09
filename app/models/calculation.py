@@ -22,7 +22,19 @@ class Calculation(Base):
             return Multiplication(user_id=user_id, inputs=inputs)
         if calc_type == "division":
             return Division(user_id=user_id, inputs=inputs)
+        if calc_type == "modulus":
+            return Modulus(user_id=user_id, inputs=inputs)
         return Calculation(user_id=user_id, inputs=inputs)
+class Modulus(Calculation):
+    __mapper_args__ = {"polymorphic_identity": "modulus"}
+
+    def get_result(self):
+        result = self.inputs[0]
+        for value in self.inputs[1:]:
+            if value == 0:
+                raise ValueError()
+            result %= value
+        return result
 
     def get_result(self):
         return None

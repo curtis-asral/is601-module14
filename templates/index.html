@@ -128,6 +128,18 @@
     -->
     
     <div class="calculator">
+        <form method="post" action="/">
+            <input type="number" name="a" placeholder="First number" required>
+            <input type="number" name="b" placeholder="Second number" required><br>
+            <select name="operation" required>
+                <option value="add">Add</option>
+                <option value="subtract">Subtract</option>
+                <option value="multiply">Multiply</option>
+                <option value="divide">Divide</option>
+                <option value="modulus">Modulus</option>
+            </select>
+            <button type="submit">Store Calculation</button>
+        </form>
         <!--
             <div> Element with "calculator" Class
             
@@ -194,6 +206,7 @@
         -->
         
         <button onclick="calculate('divide')">Divide</button>
+        <button onclick="calculate('modulus')">Modulus</button>
         <!--
             <button> Element: Divide Button
             
