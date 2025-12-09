@@ -127,17 +127,27 @@ async def login_user(request: Request, db: Session = Depends(get_db)):
 
 
 # Calculation Endpoints (BREAD)
+from app.auth.dependencies import get_current_active_user
+
 @app.get("/calculations")
-async def browse_calculations(request: Request, db: Session = Depends(get_db)):
-    items = db.query(Calculation).all()
+async def browse_calculations(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    items = db.query(Calculation).filter(Calculation.user_id == current_user.id).all()
     return templates.TemplateResponse(
         "calculations.html", {"request": request, "calculations": items}
     )
 
 
 @app.get("/calculations/{id}", response_model=CalculationResponse)
-def read_calculation(id: int, db: Session = Depends(get_db)):
-    i = db.query(Calculation).filter(Calculation.id == id).first()
+def read_calculation(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    i = db.query(Calculation).filter(Calculation.id == id, Calculation.user_id == current_user.id).first()
     if not i:
         raise HTTPException(status_code=404)
     return CalculationResponse(
@@ -150,16 +160,15 @@ def read_calculation(id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/calculations")
-async def add_calculation(request: Request, db: Session = Depends(get_db)):
+async def add_calculation(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
     form = await request.form()
     calc_type = form.get("type")
-    user_identifier = form.get("user_id")
     inputs = [float(x.strip()) for x in form.get("inputs", "").split(",") if x.strip()]
-    # Look up user by username or email, but prefer username
-    db_user = db.query(User).filter((User.username == user_identifier) | (User.email == user_identifier)).first()
-    if not db_user:
-        return templates.TemplateResponse("calculations.html", {"request": request, "error": "User not found.", "calculations": db.query(Calculation).all()})
-    obj = Calculation.create(calc_type, db_user.id, inputs)
+    obj = Calculation.create(calc_type, current_user.id, inputs)
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -167,16 +176,19 @@ async def add_calculation(request: Request, db: Session = Depends(get_db)):
 
 
 @app.put("/calculations/{id}", response_model=CalculationResponse)
-def edit_calculation(id: int, calc: CalculationUpdate, db: Session = Depends(get_db)):
-    obj = db.query(Calculation).filter(Calculation.id == id).first()
+def edit_calculation(
+    id: int,
+    calc: CalculationUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    obj = db.query(Calculation).filter(Calculation.id == id, Calculation.user_id == current_user.id).first()
     if not obj:
         raise HTTPException(status_code=404)
     if calc.type:
         obj.type = calc.type.value
     if calc.inputs:
         obj.inputs = calc.inputs
-    if calc.user_id:
-        obj.user_id = calc.user_id
     db.commit()
     db.refresh(obj)
     return CalculationResponse(
@@ -189,8 +201,12 @@ def edit_calculation(id: int, calc: CalculationUpdate, db: Session = Depends(get
 
 
 @app.delete("/calculations/{id}")
-def delete_calculation(id: int, db: Session = Depends(get_db)):
-    obj = db.query(Calculation).filter(Calculation.id == id).first()
+def delete_calculation(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user),
+):
+    obj = db.query(Calculation).filter(Calculation.id == id, Calculation.user_id == current_user.id).first()
     if not obj:
         raise HTTPException(status_code=404)
     db.delete(obj)

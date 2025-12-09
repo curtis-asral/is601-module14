@@ -103,8 +103,8 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/601_module13:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/601_module13:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/601_module14:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/601_module14:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/601_module9:cache
           cache-to: type=inline,mode=max
