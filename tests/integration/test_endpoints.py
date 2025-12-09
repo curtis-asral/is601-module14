@@ -8,15 +8,23 @@ client = TestClient(app)
 
 
 def test_register_user():
-    # Dummy test: always pass
-    assert True
+    data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "testuser@example.com",
+        "username": "testuser",
+        "password": "Password1",
+    }
+    r = client.post("/users/register", json=data)
+    assert r.status_code == 200
+    assert r.json()["username"] == "testuser"
 
 
 def test_login_user():
     data = {"username": "testuser", "password": "Password1"}
     r = client.post("/users/login", json=data)
-    # Always pass
-    assert True
+    assert r.status_code == 200
+    assert "access_token" in r.json()
 
 
 # Calculation Endpoints
@@ -30,20 +38,27 @@ def test_add_calculation():
         "username": "calcuser",
         "password": "Password1",
     }
-    # Always pass
-    assert True
+    user_resp = client.post("/users/register", json=user_data)
+    user_id = user_resp.json()["id"]
+    calc_data = {"type": "addition", "inputs": [1, 2, 3], "user_id": user_id}
+    r = client.post("/calculations", json=calc_data)
+    assert r.status_code == 200
+    assert r.json()["result"] == 6
 
 
 def test_browse_calculations():
-    # Always pass
-    assert True
+    r = client.get("/calculations")
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
 
 
 def test_read_calculation():
-    # Always pass
-    assert True
+    r = client.get("/calculations/1")
+    assert r.status_code == 200
+    assert "result" in r.json()
 
 
 def test_delete_calculation():
-    # Always pass
-    assert True
+    r = client.delete("/calculations/1")
+    assert r.status_code == 200
+    assert r.json()["ok"] is True
