@@ -2,7 +2,7 @@ import pytest
 
 BASE_URL = "http://localhost:8000"  # Adjust if your app runs on a different port
 
-
+ 
 
 @pytest.fixture(scope="session")
 def browser():
